@@ -1,14 +1,8 @@
 package maths;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
-import java.util.concurrent.RecursiveTask;
-import java.util.concurrent.TimeUnit;
 
 public class Fibonacci {
 
@@ -17,14 +11,14 @@ public class Fibonacci {
 	public static void main(String[] args) throws InterruptedException,
 			ExecutionException {
 
-		Fibonacci m = new Fibonacci();
+		
 		// 1,000,000,000) Challenge in ... 38 minutes.
 
-		BigInteger number = new BigInteger("1000000"); // new
-															// BigInteger("1000000000");
+		BigInteger number = new BigInteger("1000000"); // new BigInteger("1000000000");
 
 		long time = 0;
-
+		
+        // Fibonacci m = new Fibonacci();
 		// time = System.currentTimeMillis();
 		// System.out.println("Fib " + number + ":" +
 		// m.fastDoubleFibonacci(number).bitLength());
@@ -36,14 +30,12 @@ public class Fibonacci {
 		// m.fastFibonacciDoubling(number.longValue()).bitLength());
 		// time = System.currentTimeMillis() - time;
 		// System.out.println("Mill time = "+time);
-		//
-		//
-		
-		time = System.currentTimeMillis();
-		System.out.println("Fib " + number + ":"
-				+ m.fibMatrix(number).bitLength());
-		time = System.currentTimeMillis() - time;
-		System.out.println("Mill time = " + time);
+
+		// time = System.currentTimeMillis();
+		// System.out.println("Fib " + number + ":"
+		// + m.fibMatrix(number).bitLength());
+		// time = System.currentTimeMillis() - time;
+		// System.out.println("Mill time = " + time);
 
 		time = System.currentTimeMillis();
 		// Fastest method
@@ -102,7 +94,8 @@ public class Fibonacci {
 	}
 
 	void multiply2(BigInteger F[][], BigInteger M[][]) {
-		BigInteger[][] R = {{BigInteger.ZERO, BigInteger.ZERO}, {BigInteger.ZERO, BigInteger.ZERO}};
+		BigInteger[][] R = { { BigInteger.ZERO, BigInteger.ZERO },
+				{ BigInteger.ZERO, BigInteger.ZERO } };
 		ForkJoinPool pool = new ForkJoinPool();
 		pool.invoke(new Multiplier(F, M, R, 0));
 
@@ -111,7 +104,6 @@ public class Fibonacci {
 		F[1][0] = R[1][0];
 		F[1][1] = R[1][1];
 	}
-
 
 	public static int fibUsingRecursion(int n) {
 		if (n < 2) {
@@ -136,6 +128,7 @@ public class Fibonacci {
 	 * (2*F(n+1) - F(n)). F(2n+1) = F(n+1)^2 + F(n)^2. This implementation is
 	 * the non-recursive version.
 	 */
+	@SuppressWarnings("unused")
 	private BigInteger fastFibonacciDoubling(long n) {
 		BigInteger a = BigInteger.ZERO;
 		BigInteger b = BigInteger.ONE;
@@ -162,7 +155,8 @@ public class Fibonacci {
 		}
 		return a;
 	}
-
+	
+	@SuppressWarnings("unused")
 	private BigInteger fastDoubleFibonacci(BigInteger n) {
 		if (n.compareTo(TWO) < 1) {
 			return BigInteger.ONE;
