@@ -33,9 +33,11 @@ class FibRecursiveTask extends RecursiveTask<BigInteger> {
 	    if (n.testBit(0))
 	    {
 	        // return a*a + b*b;
+	    	// return KaratsubaMultiplication.multiply(a, a).add(KaratsubaMultiplication.multiply(b, b));
 	        return a.multiply(a).add(b.multiply(b));
 	    }
 	    // return b*(2*a - b);
+	    // return KaratsubaMultiplication.multiply(b,a.shiftLeft(1).subtract(b));
 	    return b.multiply(a.shiftLeft(1).subtract(b));
 	}
 	

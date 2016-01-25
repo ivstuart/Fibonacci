@@ -1,48 +1,61 @@
 package maths;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.RecursiveTask;
+import java.util.concurrent.TimeUnit;
 
 public class Fibonacci {
 
 	public static BigInteger TWO = BigInteger.valueOf(2);
-	
-	public static void main(String[] args) throws InterruptedException, ExecutionException {
+
+	public static void main(String[] args) throws InterruptedException,
+			ExecutionException {
 
 		Fibonacci m = new Fibonacci();
-        // 1,000,000,000) Challenge in ... 38 minutes.
-		
-		BigInteger number = new BigInteger("1000000"); // new BigInteger("1000000000");
-		
+		// 1,000,000,000) Challenge in ... 38 minutes.
+
+		BigInteger number = new BigInteger("1000000"); // new
+															// BigInteger("1000000000");
+
 		long time = 0;
-		
-	    time = System.currentTimeMillis();
-		System.out.println("Fib " + number + ":" + m.fastDoubleFibonaci(number).bitLength());
-		time = System.currentTimeMillis() - time;
-		System.out.println("Mill time = "+time);
-	
-	    time = System.currentTimeMillis();
-		System.out.println("Fib " + number + ":" + m.fastFibonacciDoubling(number.longValue()).bitLength());
-		time = System.currentTimeMillis() - time;
-		System.out.println("Mill time = "+time);
-		
+
+		// time = System.currentTimeMillis();
+		// System.out.println("Fib " + number + ":" +
+		// m.fastDoubleFibonacci(number).bitLength());
+		// time = System.currentTimeMillis() - time;
+		// System.out.println("Mill time = "+time);
+
+		// time = System.currentTimeMillis();
+		// System.out.println("Fib " + number + ":" +
+		// m.fastFibonacciDoubling(number.longValue()).bitLength());
+		// time = System.currentTimeMillis() - time;
+		// System.out.println("Mill time = "+time);
+		//
+		//
 		
 		time = System.currentTimeMillis();
-		System.out.println("Fib " + number + ":" + m.fibMatrix(number).bitLength());
+		System.out.println("Fib " + number + ":"
+				+ m.fibMatrix(number).bitLength());
 		time = System.currentTimeMillis() - time;
-		System.out.println("Mill time = "+time);
-		
+		System.out.println("Mill time = " + time);
+
 		time = System.currentTimeMillis();
 		// Fastest method
 		FibRecursiveTask fibRecursive = new FibRecursiveTask(number);
 		ForkJoinPool pool = new ForkJoinPool();
 		pool.invoke(fibRecursive);
-		
-		System.out.println("Fib " + number + ":" + fibRecursive.get().bitLength());
+
+		System.out.println("Fib " + number + ":"
+				+ fibRecursive.get().bitLength());
 		time = System.currentTimeMillis() - time;
-		System.out.println("Mill time = "+time);	
-		
+		System.out.println("Time s = " + time / 1000.0);
+
 	}
 
 	BigInteger fibMatrix(BigInteger n) {
@@ -64,23 +77,41 @@ public class Fibonacci {
 
 		final BigInteger TWO = BigInteger.valueOf(2);
 		power(F, n.divide(TWO));
-		multiply(F, F);
+		multiply2(F, F);
 
 		if (n.mod(TWO).compareTo(BigInteger.ZERO) != 0)
-			multiply(F, M);
+			multiply2(F, M);
+
 	}
 
 	void multiply(BigInteger F[][], BigInteger M[][]) {
-		BigInteger a = F[0][0].multiply(M[0][0]).add(F[0][1].multiply(M[1][0]));
-		BigInteger b = F[0][0].multiply(M[0][1]).add(F[0][1].multiply(M[1][1]));
-		BigInteger c = F[1][0].multiply(M[0][0]).add(F[1][1].multiply(M[1][0]));
-		BigInteger d = F[1][0].multiply(M[0][1]).add(F[1][1].multiply(M[1][1]));
+
+		BigInteger a = multiply(F[0][0], M[0][0]).add(
+				multiply(F[0][1], M[1][0]));
+		BigInteger b = multiply(F[0][0], M[0][1]).add(
+				KaratsubaMultiplication.multiply(F[0][1], M[1][1]));
+		BigInteger c = multiply(F[1][0], M[0][0]).add(
+				KaratsubaMultiplication.multiply(F[1][1], M[1][0]));
+		BigInteger d = multiply(F[1][0], M[0][1]).add(
+				multiply(F[1][1], M[1][1]));
 
 		F[0][0] = a;
 		F[0][1] = b;
 		F[1][0] = c;
 		F[1][1] = d;
 	}
+
+	void multiply2(BigInteger F[][], BigInteger M[][]) {
+		BigInteger[][] R = {{BigInteger.ZERO, BigInteger.ZERO}, {BigInteger.ZERO, BigInteger.ZERO}};
+		ForkJoinPool pool = new ForkJoinPool();
+		pool.invoke(new Multiplier(F, M, R, 0));
+
+		F[0][0] = R[0][0];
+		F[0][1] = R[0][1];
+		F[1][0] = R[1][0];
+		F[1][1] = R[1][1];
+	}
+
 
 	public static int fibUsingRecursion(int n) {
 		if (n < 2) {
@@ -99,20 +130,19 @@ public class Fibonacci {
 		}
 		return prev1;
 	}
-	
-	/* 
-	 * Fast doubling method. Faster than the matrix method.
-	 * F(2n) = F(n) * (2*F(n+1) - F(n)).
-	 * F(2n+1) = F(n+1)^2 + F(n)^2.
-	 * This implementation is the non-recursive version. 
+
+	/*
+	 * Fast doubling method. Faster than the matrix method. F(2n) = F(n) *
+	 * (2*F(n+1) - F(n)). F(2n+1) = F(n+1)^2 + F(n)^2. This implementation is
+	 * the non-recursive version.
 	 */
 	private BigInteger fastFibonacciDoubling(long n) {
 		BigInteger a = BigInteger.ZERO;
 		BigInteger b = BigInteger.ONE;
-		
+
 		for (int i = 63 - Long.numberOfLeadingZeros(n); i >= 0; i--) {
 			// Loop invariant: a = F(m), b = F(m+1)
-			
+
 			// Double it
 			BigInteger d = multiply(a, b.shiftLeft(1).subtract(a));
 			BigInteger e = multiply(a, a).add(multiply(b, b));
@@ -120,7 +150,9 @@ public class Fibonacci {
 			b = e;
 
 			// Advance by one conditionally
-			// The unsigned right shift operator ">>>" shifts a zero into the leftmost position, while the leftmost position after ">>" depends on sign extension.
+			// The unsigned right shift operator ">>>" shifts a zero into the
+			// leftmost position, while the leftmost position after ">>" depends
+			// on sign extension.
 			if (((n >>> i) & 1) != 0) {
 				BigInteger c = a.add(b);
 				a = b;
@@ -130,39 +162,41 @@ public class Fibonacci {
 		}
 		return a;
 	}
-	
-	private BigInteger fastDoubleFibonaci(BigInteger n)
-	{
-	    if (n.compareTo(TWO) < 1)
-	    {
-	        return BigInteger.ONE;
-	    }
 
-	    BigInteger k = n.shiftRight(1); // n.divide(TWO);
-	    BigInteger a = fastDoubleFibonaci(k.add(BigInteger.ONE));
-	    BigInteger b = fastDoubleFibonaci(k);
-	    if (n.testBit(0))
-	    // if (n.mod(TWO).compareTo(BigInteger.ONE) == 0)
-	    {
-	        // return a*a + b*b;
-	        return a.multiply(a).add(b.multiply(b));
-	    }
-	    // return b*(2*a - b);
-	    return b.multiply(a.shiftLeft(1).subtract(b));
+	private BigInteger fastDoubleFibonacci(BigInteger n) {
+		if (n.compareTo(TWO) < 1) {
+			return BigInteger.ONE;
+		}
+
+		BigInteger k = n.shiftRight(1); // n.divide(TWO);
+		BigInteger a = fastDoubleFibonacci(k.add(BigInteger.ONE));
+		BigInteger b = fastDoubleFibonacci(k);
+		if (n.testBit(0))
+		// if (n.mod(TWO).compareTo(BigInteger.ONE) == 0)
+		{
+			// return a*a + b*b;
+			return a.multiply(a).add(b.multiply(b));
+		}
+		// return b*(2*a - b);
+		return b.multiply(a.shiftLeft(1).subtract(b));
 	}
-	
-	
-	// Multiplies two BigIntegers. This function makes it easy to swap in a faster algorithm like Karatsuba multiplication.
+
+	// Multiplies two BigIntegers. This function makes it easy to swap in a
+	// faster algorithm like Karatsuba multiplication.
 	private static BigInteger multiply(BigInteger x, BigInteger y) {
 		return x.multiply(y);
 	}
-	
+
+	@SuppressWarnings("unused")
 	private static int scientific(int n) {
-		if (n==0) return 0;
-		if (n<3) return 1;
+		if (n == 0)
+			return 0;
+		if (n < 3)
+			return 1;
 		double root5 = Math.sqrt(5);
-		double fib = 1/root5*( Math.pow((1+root5)/2, n) - Math.pow((1-root5)/2, n));
-		return (int)Math.round(fib);
+		double fib = 1 / root5
+				* (Math.pow((1 + root5) / 2, n) - Math.pow((1 - root5) / 2, n));
+		return (int) Math.round(fib);
 	}
 
 }
