@@ -12,10 +12,16 @@ public class Fibonacci {
 
 		Fibonacci m = new Fibonacci();
         // 1,000,000,000) Challenge in ... 38 minutes.
-		
-		BigInteger number = new BigInteger("1000000"); // new BigInteger("1000000000");
-		
+
+		BigInteger number = new BigInteger("10000");
+		number =  new BigInteger("1000");
 		long time = 0;
+
+		time = System.currentTimeMillis();
+
+		System.out.println("Fib " + number + ":" + m.pauls(number).bitLength());
+		time = System.currentTimeMillis() - time;
+		System.out.println("Mill time = "+time);
 		
 	    time = System.currentTimeMillis();
 		System.out.println("Fib " + number + ":" + m.fastDoubleFibonaci(number).bitLength());
@@ -32,13 +38,13 @@ public class Fibonacci {
 		System.out.println("Fib " + number + ":" + m.fibMatrix(number).bitLength());
 		time = System.currentTimeMillis() - time;
 		System.out.println("Mill time = "+time);
-		
+
 		time = System.currentTimeMillis();
 		// Fastest method
 		FibRecursiveTask fibRecursive = new FibRecursiveTask(number);
 		ForkJoinPool pool = new ForkJoinPool();
 		pool.invoke(fibRecursive);
-		
+
 		System.out.println("Fib " + number + ":" + fibRecursive.get().bitLength());
 		time = System.currentTimeMillis() - time;
 		System.out.println("Mill time = "+time);	
@@ -150,9 +156,7 @@ public class Fibonacci {
 	    // return b*(2*a - b);
 	    return b.multiply(a.shiftLeft(1).subtract(b));
 	}
-	
-	
-	// Multiplies two BigIntegers. This function makes it easy to swap in a faster algorithm like Karatsuba multiplication.
+
 	private static BigInteger multiply(BigInteger x, BigInteger y) {
 		return x.multiply(y);
 	}
@@ -163,6 +167,24 @@ public class Fibonacci {
 		double root5 = Math.sqrt(5);
 		double fib = 1/root5*( Math.pow((1+root5)/2, n) - Math.pow((1-root5)/2, n));
 		return (int)Math.round(fib);
+	}
+
+	// Pauls formula
+	private static BigInteger pauls(BigInteger n) {
+		//   def fib(n):
+		// return (4 << n*(3+n)) // ((4 << 2*n) - (2 << n) - 1) & ((2 << n) - 1)
+
+		BigInteger top = BigInteger.valueOf(4).shiftLeft(n.multiply(n.add(BigInteger.valueOf(3))).intValue());
+
+		BigInteger bot1 = BigInteger.valueOf(4).shiftLeft(BigInteger.valueOf(2).multiply(n).intValue());
+
+		BigInteger bot2 = BigInteger.valueOf(2).shiftLeft(n.intValue());
+
+		BigInteger bottem = bot1.subtract(bot2).subtract(BigInteger.ONE);
+
+		BigInteger calc = top.divide(bottem).mod(bot2);
+
+		return calc;
 	}
 
 }
